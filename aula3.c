@@ -1,57 +1,62 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <signal.h>
 #include <unistd.h>
+#include <signal.h>
 #include <stdbool.h>
 
+
 int contador = 0;
-char controle;
-bool controle_while = true;
+bool controle = true;
+int resposta = 0;
 
-void alarmHandler(){
+void handler_c(){
 
-    printf("voce tem 20 segundos para se decidir, caso contrario o programa fecahrá\n");
-    controle_while = false;
-}
+    printf("\nvoce apertou ctrl C\n");
+    
+    contador++;
 
-void handler_c(int signum){
-    pause();
-    contador=contador+1;
-    printf("%d",contador);
 }
 
 void handler_z(){
-    pause();
+
     printf("voce apertou ^C '%d' vezes", contador);
+
 }
+
+void alarmHandler(){
+
+    printf("\n se passaram 20 segundos e o programa ira finalizar \n");
+    controle = 0;
+}
+
+
 
 int main(){
 
-    signal(SIGINT,handler_c);        
+    signal(SIGINT,handler_c); 
     signal(SIGTSTP, handler_z);
+    signal(SIGALRM, alarmHandler);
 
-    while(controle_while){
-
+    while(controle){
+        
         if (contador >= 3){
 
-            printf("realmente deseja sair do programa?[y/n]");
-            scanf("%controle",&controle);
+            printf("realmente deseja sair do programa?[1/0]");
+            alarm(10);
+            scanf("%d",&resposta);
             
-            if(controle=="y"){
-                controle_while = false;
-            }if(controle == "n"){
-                controle_while = true;
-                contador = 0 ;
-            }
-            if(contador >=3){
-                alarm(20);
-                signal(SIGALRM, alarmHandler);
+            if(resposta==1){
+                controle = 0;
+                contador = 0;
+            }if(resposta == 0){
+                controle = 1;
+                contador = 0;
             }
         }
-    }    
-
-    printf("\n\nobrigado por usar o prgrama\n\n");
+    }
+    
+    printf("obrigado");
 
     return 0;
 }
+
