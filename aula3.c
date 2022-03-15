@@ -19,7 +19,7 @@ void handler_c(){
 
 void handler_z(){
 
-    printf("voce apertou ^C '%d' vezes", contador);
+    printf("\nvoce apertou ^C '%d' vezes\n", contador);
 
 }
 
@@ -43,7 +43,7 @@ int main(){
 
             printf("realmente deseja sair do programa?[1/0]");
             alarm(10);
-            scanf("%d",&resposta);
+            //scanf("%d",&resposta);
             
             if(resposta==1){
                 controle = 0;
@@ -55,8 +55,7 @@ int main(){
         }
     }
     
-    printf("obrigado");
+    printf("obrigado\n");
 
     return 0;
 }
-
