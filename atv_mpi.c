@@ -2,21 +2,15 @@
 #include <stdio.h>
 #define COORDENADOR 0
 
+int mat3[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
+
 int main(int argc, char **argv)
 {
-
-    // for(int i = 0; o < 3; i++){
-    //     for(int j = 0, j < 3; j++){
-    //         printf("Defina o valor da matriz na prosicao M[%d][%d]", i, j);
-    //         scanf(%d, &matriz[i][j]);
-    //     }
-    // }
-
-    int mat1[3][3] = {{0, 1, 2}, {1, 4, 3}, {5, 6, 2}};
-    int mat2[3][3] = {{0, 1, 2}, {1, 4, 3}, {5, 6, 2}};
-    int mat3[3][3];
-
     int i, id, size, len, tag = 666;
+
+    int *linha;
+    int *buffmat2[3][3];
+
     int *enviado;
     int termo_recebido1;
     int termo_recebido2;
@@ -28,28 +22,53 @@ int main(int argc, char **argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &id);
     MPI_Comm_size(MPI_COMM_WORLD, &size); // size == número de processos
 
+
     if (id == COORDENADOR)
     {
+        int mat1[3][3] = {{0, 1, 2}, {1, 4, 3}, {5, 6, 2}};
+        int mat2[3][3] = {{0, 1, 2}, {1, 4, 3}, {5, 6, 2}};
+        printf("entrouaqui1 ");
         for (i = 1; i < size; ++i)
         {
-            for (int j = 0; j < 3; j++)
-            {
-                for (int k = 0; k < 3; k++)
-                {
-                    int somaprod = 0;
-                    for (int l = 0; l < 3; l++)
-                    {
-                        termo1 = mat1[j][l];
-                        termo2 = mat2[i][k];
-                        MPI_Send(termo1, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-                        MPI_Send(termo2, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-                        somaprod += mat1[j][l] * mat2[i][k];
-                        mat3[j][k] = somaprod;
-                    }
-                }
-            }
+            printf("entrouaqui2 ");
+
+                //envia a linha m1
+                printf("entrouaqui3\n ");
+                MPI_Send(mat1[i-1], 1, MPI_INT, i, tag, MPI_COMM_WORLD);
+                printf("entrouaqui4\n");
+
+                //envia a matriz m2
+                MPI_Send(mat2, 3*3, MPI_INT, i, tag, MPI_COMM_WORLD);
+
+                //recebe a linha da matriz nova m3
+
+
+                //aloca a linha na matriz nova m3
+
         }
-        for (int i = 0; i < 3; i++)
+    }
+    if(id > 0)
+    {
+        printf("entrouaqui5 ");
+        MPI_Recv(&linha, 3, MPI_INT, COORDENADOR, tag, MPI_COMM_WORLD, &stats);
+        printf("entrou aqui6 \n");
+        MPI_Recv(&buffmat2, 3*3, MPI_INT, COORDENADOR, tag, MPI_COMM_WORLD, &stats);
+        printf("entrou aqui6 \n");
+        printf("\nO processo %d recebeu a linha com digito inicial: %d", i, linha[0]);
+
+
+        for(int k = 0; k > 3 ; k++){
+            printf("multiplica\n");
+            mat3[i-1][k] = mat3[i-1][k] + linha[k] * *buffmat2[k][i-1];
+        }
+    }
+
+
+
+
+    MPI_Finalize();
+
+            for (int i = 0; i < 3; i++)
         {
             for (int j = 0; j < 3; j++)
             {
@@ -57,22 +76,6 @@ int main(int argc, char **argv)
             }
             printf("\n");
         }
-    }
-    else
-    {
-        MPI_Recv(&termo_recebido1, 1, MPI_INT, COORDENADOR, tag, MPI_COMM_WORLD, &stats);
-        MPI_Recv(&termo_recebido2, 1, MPI_INT, COORDENADOR, tag, MPI_COMM_WORLD, &stats);
-
-        int somaprod = 0;
-
-        somaprod = termo_recebido1 * termo_recebido2;
-
-        printf("\nO processo %d recebeu %d e %d, e esta retornando %d\n", i, termo_recebido1, termo_recebido2, somaprod);
-
-        MPI_Send(&somaprod, 1, MPI_INT, COORDENADOR, tag, MPI_COOM_WORLD);
-    }
-
-    MPI_Finalize();
 
     return 0;
 }
